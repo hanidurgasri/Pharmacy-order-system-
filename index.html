@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharmacy Order System</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <i class="fas fa-prescription-bottle-alt"></i>
+        <h1>Pharmacy Order System</h1>
+        <p>Sign in to your account</p>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="loginEmail" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <div id="loginError" class="error-message"></div>
+        <button type="submit" class="btn btn-primary btn-block">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="appScreen" class="app-container" style="display:none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <i class="fas fa-prescription-bottle-alt"></i>
+        <span>PharmacyOS</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="medicines">
+          <i class="fas fa-pills"></i> <span>Medicines</span>
+        </a>
+        <a href="#" class="nav-item" data-page="orders">
+          <i class="fas fa-shopping-cart"></i> <span>Orders</span>
+        </a>
+        <a href="#" class="nav-item" data-page="customers">
+          <i class="fas fa-users"></i> <span>Customers</span>
+        </a>
+        <a href="#" class="nav-item" data-page="newOrder">
+          <i class="fas fa-plus-circle"></i> <span>New Order</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <div>
+            <span id="userName">User</span>
+            <small id="userRole">Role</small>
+          </div>
+        </div>
+        <button id="logoutBtn" class="btn btn-logout">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <h2 id="pageTitle">Dashboard</h2>
+        <div class="topbar-right">
+          <span id="currentDateTime"></span>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active-page">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fas fa-shopping-cart"></i></div>
+              <div class="stat-info">
+                <h3 id="totalOrders">0</h3>
+                <p>Total Orders</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fas fa-rupee-sign"></i></div>
+              <div class="stat-info">
+                <h3 id="totalRevenue">₹0</h3>
+                <p>Total Revenue</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="fas fa-calendar-day"></i></div>
+              <div class="stat-info">
+                <h3 id="todayOrders">0</h3>
+                <p>Today's Orders</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red"><i class="fas fa-money-bill-wave"></i></div>
+              <div class="stat-info">
+                <h3 id="todayRevenue">₹0</h3>
+                <p>Today's Revenue</p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Orders</h3>
+            </div>
+            <div class="card-body">
+              <table class="table" id="recentOrdersTable">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medicines Page -->
+        <div id="page-medicines" class="page">
+          <div class="card">
+            <div class="card-header">
+              <h3>Medicine Inventory</h3>
+              <div class="card-actions">
+                <input type="text" id="medicineSearch" class="search-input" placeholder="Search medicines...">
+                <select id="categoryFilter" class="form-select">
+                  <option value="">All Categories</option>
+                  <option value="Tablet">Tablet</option>
+                  <option value="Capsule">Capsule</option>
+                  <option value="Syrup">Syrup</option>
+                  <option value="Injection">Injection</option>
+                  <option value="Cream">Cream</option>
+                  <option value="Inhaler">Inhaler</option>
+                  <option value="Drops">Drops</option>
+                  <option value="Other">Other</option>
+                </select>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="lowStockFilter"> Low Stock Only
+                </label>
+                <button class="btn btn-primary" onclick="showModal('medicineModal')">
+                  <i class="fas fa-plus"></i> Add Medicine
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="table" id="medicinesTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Manufacturer</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Expiry</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Page -->
+        <div id="page-orders" class="page">
+          <div class="card">
+            <div class="card-header">
+              <h3>All Orders</h3>
+              <div class="card-actions">
+                <input type="date" id="orderStartDate" class="form-input">
+                <input type="date" id="orderEndDate" class="form-input">
+                <select id="orderStatusFilter" class="form-select">
+                  <option value="">All Status</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Returned">Returned</option>
+                </select>
+                <button class="btn btn-primary" onclick="filterOrders()"><i class="fas fa-filter"></i> Filter</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="table" id="ordersTable">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customers Page -->
+        <div id="page-customers" class="page">
+          <div class="card">
+            <div class="card-header">
+              <h3>Customers</h3>
+              <div class="card-actions">
+                <input type="text" id="customerSearch" class="search-input" placeholder="Search customers...">
+                <button class="btn btn-primary" onclick="showModal('customerModal')">
+                  <i class="fas fa-plus"></i> Add Customer
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="table" id="customersTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Total Purchases</th>
+                    <th>Last Purchase</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Order Page -->
+        <div id="page-newOrder" class="page">
+          <div class="order-form-container">
+            <div class="card">
+              <div class="card-header">
+                <h3>Customer Information</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" id="orderCustomerName" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="orderCustomerPhone" class="form-input">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3>Add Medicines</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Select Medicine</label>
+                    <select id="medicineSelect" class="form-select">
+                      <option value="">-- Select --</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="itemQuantity" class="form-input" min="1" value="1">
+                  </div>
+                  <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="addOrderItem()">
+                      <i class="fas fa-plus"></i> Add
+                    </button>
+                  </div>
+                </div>
+                <table class="table" id="orderItemsTable">
+                  <thead>
+                    <tr>
+                      <th>Medicine</th>
+                      <th>Price</th>
+                      <th>Qty</th>
+                      <th>Total</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div class="order-summary">
+                  <div class="summary-row"><span>Subtotal:</span><span id="orderSubtotal">₹0.00</span></div>
+                  <div class="summary-row"><span>Tax (5%):</span><span id="orderTax">₹0.00</span></div>
+                  <div class="summary-row">
+                    <span>Discount:</span>
+                    <input type="number" id="orderDiscount" class="form-input discount-input" min="0" value="0" oninput="updateOrderTotal()">
+                  </div>
+                  <div class="summary-row total"><span>Total:</span><span id="orderTotal">₹0.00</span></div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Payment Method</label>
+                    <select id="orderPaymentMethod" class="form-select">
+                      <option value="Cash">Cash</option>
+                      <option value="Card">Card</option>
+                      <option value="UPI">UPI</option>
+                      <option value="Insurance">Insurance</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="orderNotes" class="form-input">
+                  </div>
+                </div>
+                <button class="btn btn-success btn-block" onclick="placeOrder()">
+                  <i class="fas fa-check-circle"></i> Place Order
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Medicine Modal -->
+  <div id="medicineModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('medicineModal')">&times;</span>
+      <h3 id="medicineModalTitle">Add Medicine</h3>
+      <form id="medicineForm">
+        <input type="hidden" id="medicineId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Medicine Name *</label>
+            <input type="text" id="medName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>Generic Name</label>
+            <input type="text" id="medGenericName" class="form-input">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="medCategory" class="form-select" required>
+              <option value="">Select</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Syrup">Syrup</option>
+              <option value="Injection">Injection</option>
+              <option value="Cream">Cream</option>
+              <option value="Inhaler">Inhaler</option>
+              <option value="Drops">Drops</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Manufacturer *</label>
+            <input type="text" id="medManufacturer" class="form-input" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" id="medPrice" class="form-input" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Cost Price (₹)</label>
+            <input type="number" id="medCostPrice" class="form-input" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Stock *</label>
+            <input type="number" id="medStock" class="form-input" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" id="medExpiry" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="medPrescription"> Requires Prescription
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Dosage</label>
+          <input type="text" id="medDosage" class="form-input" placeholder="e.g., 1 tablet twice daily">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="medDescription" class="form-input" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Medicine</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Customer Modal -->
+  <div id="customerModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('customerModal')">&times;</span>
+      <h3 id="customerModalTitle">Add Customer</h3>
+      <form id="customerForm">
+        <input type="hidden" id="customerId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name *</label>
+            <input type="text" id="custName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>Phone *</label>
+            <input type="text" id="custPhone" class="form-input" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="custEmail" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="custAge" class="form-input" min="0" max="150">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="custGender" class="form-select">
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="custAddress" class="form-input" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Customer</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content invoice-modal">
+      <span class="close" onclick="closeModal('invoiceModal')">&times;</span>
+      <div id="invoiceContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
